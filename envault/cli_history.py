@@ -43,3 +43,18 @@ def rollback_cmd(key: str, version: int, vault_dir: str, password: str) -> None:
     vault = get_vault(vault_dir, password)
     vault.set(key, value)
     click.echo(f"Rolled back '{key}' to version {version}.")
+
+
+@click.command("clear-history")
+@click.argument("key")
+@click.option("--vault-dir", default=".envault", show_default=True)
+@click.option("--password", prompt=True, hide_input=True)
+@click.confirmation_option(prompt="Are you sure you want to clear the history for this key?")
+def clear_history_cmd(key: str, vault_dir: str, password: str) -> None:
+    """Delete all history entries for KEY."""
+    entries = get_history(vault_dir, key)
+    if not entries:
+        click.echo(f"No history found for '{key}'.")
+        return
+    clear_history(vault_dir, key)
+    click.echo(f"Cleared {len(entries)} history entry/entries for '{key}'.")
